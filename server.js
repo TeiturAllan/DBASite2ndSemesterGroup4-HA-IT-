@@ -9,12 +9,20 @@ const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
+const Connection = require('tedious').Connection;
 //end of dependancies
 
 //start of importing classes
 let CreateUser = require('./classes/CreateUserClass.js')
 
 //end of importing classes
+
+//start of importing from database and database/queries
+const dbConfig = require('./database/dbconfig')//importing data from dbConfig for db queries
+let Request = require('tedious').Request
+let TYPES = require('tedious').TYPES
+
+
 
 const initializePassport = require('./passportConfig')
     initializePassport(
@@ -65,9 +73,43 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
 
 app.post('/register', checkNotAuthenticated, (req, res) => {
     let newUser = new CreateUser(Date.now().toString(), req.body.username, req.body.password, req.body.email, req.body.telephone_number)
-    users.push(newUser)
+    users.push(newUser) 
     res.redirect('/login')
-    console.log(users)
+    console.log('USERS' + users)
+    var connection = new Connection(dbConfig);  
+    connection.on('connect', function(err) {  
+        // If no error, then good to proceed.  
+        console.log("Connected");  
+        executeInsertUserQuery(newUser);  
+    });
+    connection.connect();
+
+
+    function executeInsertUserQuery(insertUser){
+        console.log('insertUserQuery' + insertUser)
+        let request = new Request(`INSERT into dbo.Users (Username, Password, Email_Address, Telephone_Number)
+            VALUES ('${insertUser.username}', '${insertUser.password}', '${insertUser.email}', ${insertUser.telephone_number});`, function(err) {
+            if(err){
+                console.log(err);
+            }
+        })
+          
+        request.on('row', function(columns) {  
+            columns.forEach(function(column) {  
+              if (column.value === null) {  
+                console.log('NULL');  
+              } else {  
+                console.log("Product id of inserted item is " + column.value);  
+              }  
+            });  
+        });
+
+        // Close the connection after the final event emitted by the request, after the callback passes
+        request.on("requestCompleted", function (rowCount, more) {
+            connection.close();
+        });
+        connection.execSql(request);  
+    } // end of function
 })
 
 

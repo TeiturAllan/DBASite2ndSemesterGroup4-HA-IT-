@@ -15,7 +15,8 @@
     "express-session": "^1.17.2",
     "method-override": "^3.0.0",
     "passport": "^0.5.2",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "tedious": "^14.4.0"
   },
   "devDependencies": {
     "dotenv": "^16.0.0",
