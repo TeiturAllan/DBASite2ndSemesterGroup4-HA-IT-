@@ -2,12 +2,19 @@ if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
   }
 
+//start of dependancies 
 const express = require('express')
 const app = express()
 const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
+//end of dependancies
+
+//start of importing classes
+let CreateUser = require('./classes/CreateUserClass.js')
+
+//end of importing classes
 
 const initializePassport = require('./passportConfig')
     initializePassport(
@@ -57,12 +64,8 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
 })
 
 app.post('/register', checkNotAuthenticated, (req, res) => {
-    users.push({
-        id: Date.now().toString(),
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password
-    })
+    let newUser = new CreateUser(Date.now().toString(), req.body.username, req.body.password, req.body.email, req.body.telephone_number)
+    users.push(newUser)
     res.redirect('/login')
     console.log(users)
 })
