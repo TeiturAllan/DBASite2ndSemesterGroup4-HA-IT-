@@ -14,7 +14,7 @@ const Connection = require('tedious').Connection;
 
 //start of importing classes
 let CreateUser = require('./classes/CreateUserClass.js')
-
+let SignedInUser = require('./classes/SignedInUserClass')
 //end of importing classes
 
 //start of importing from database and database/queries
@@ -24,15 +24,15 @@ let TYPES = require('tedious').TYPES
 
 
 
-const initializePassport = require('./passportConfig')
-    initializePassport(
-    passport,
+const passportConfig = require('./passportConfig')
+    
+passportConfig.initialize(passport,
     email => users.find(user => user.email === email),
     id => users.find(user => user.id === id)
 )
 
 
-const users = []
+let users = passportConfig.users
 
 
 app.set('view-engine', 'ejs')
@@ -75,7 +75,6 @@ app.post('/register', checkNotAuthenticated, (req, res) => {
     let newUser = new CreateUser(Date.now().toString(), req.body.username, req.body.password, req.body.email, req.body.telephone_number)
     users.push(newUser) 
     res.redirect('/login')
-    console.log('USERS' + users)
     var connection = new Connection(dbConfig);  
     connection.on('connect', function(err) {  
         // If no error, then good to proceed.  
@@ -85,9 +84,9 @@ app.post('/register', checkNotAuthenticated, (req, res) => {
     connection.connect();
 
 
-    function executeInsertUserQuery(insertUser){
+        function executeInsertUserQuery(insertUser){
         console.log('insertUserQuery' + insertUser)
-        let request = new Request(`INSERT into dbo.Users (Username, Password, Email_Address, Telephone_Number)
+        let request = new Request(`INSERT into dbo.Users (username, password, email, telephone_number)
             VALUES ('${insertUser.username}', '${insertUser.password}', '${insertUser.email}', ${insertUser.telephone_number});`, function(err) {
             if(err){
                 console.log(err);
@@ -136,6 +135,58 @@ function checkNotAuthenticated(req, res, next) {
     }
     next()
 }
+
+//start of function definition for FindUserByEmailQueryFunction
+function executeFindUserByEmailQuery(insertedEmail){
+    var connection = new Connection(dbConfig);  
+        connection.on('connect', function(err) {  
+            // If no error, then good to proceed.
+            console.log("Connected");   
+            FindUserByEmailQuery(insertedEmail)
+        }); 
+        connection.connect();
+    
+        function FindUserByEmailQuery(email){
+            let request = new Request(`SELECT * FROM dbo.Users WHERE email = '${email}'FOR JSON AUTO`, function(err) {
+                if (err){
+                    console.log(err);
+                }
+            });
+        
+            var result = "";  
+            request.on('row', function(columns) {  
+                columns.forEach(function(column) {  
+                if (column.value === null) {  
+                    console.log('NULL');  
+                } else {  
+                    result+= column.value + " ";  
+                }  
+            });  
+            let userSigningInArray = JSON.parse(result)
+            let userSigningIn = userSigningInArray.shift()
+            let loggedInUser = new SignedInUser(userSigningIn.id, userSigningIn.username, userSigningIn.password, userSigningIn.email, userSigningIn.telephone_number)
+            users.push(loggedInUser)
+            console.log(users)
+            result ="";  
+            });
+            
+            request.on('done', function(rowCount, more) {  
+            console.log(rowCount + ' rows returned');  
+            }); 
+        
+            request.on("requestCompleted", function (rowCount, more) {
+                connection.close();
+            });
+            
+            connection.execSql(request);  
+            
+        }
+    }
+//en of     
+
+
+
+
 
 PORT = 3000
 app.listen(PORT)

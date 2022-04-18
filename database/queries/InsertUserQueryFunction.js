@@ -12,8 +12,8 @@ var Request = require('tedious').Request
     });
 
     function executeInsertUserQuery(insertUser){
-        console.log(insertUser)
-        let request = new Request(`INSERT into dbo.Users (Username, Password, Email_Address, Telephone_Number)
+        console.log('insertUserQuery' + insertUser)
+        let request = new Request(`INSERT into dbo.Users (username, password, email, telephone_number)
             VALUES ('${insertUser.username}', '${insertUser.password}', '${insertUser.email}', ${insertUser.telephone_number});`, function(err) {
             if(err){
                 console.log(err);
