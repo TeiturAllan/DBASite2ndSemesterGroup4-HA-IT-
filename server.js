@@ -27,12 +27,12 @@ let TYPES = require('tedious').TYPES
 const passportConfig = require('./passportConfig')
     
 passportConfig.initialize(passport,
-    email => users.find(user => user.email === email),
-    id => users.find(user => user.id === id)
+    email => SignedInUsers.find(user => user.email === email),
+    id => SignedInUsers.find(user => user.id === id)
 )
 
 
-let users = passportConfig.users
+let SignedInUsers = passportConfig.SignedInUsers
 
 
 app.set('view-engine', 'ejs')
@@ -73,7 +73,6 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
 
 app.post('/register', checkNotAuthenticated, (req, res) => {
     let newUser = new CreateUser(Date.now().toString(), req.body.username, req.body.password, req.body.email, req.body.telephone_number)
-    users.push(newUser) 
     res.redirect('/login')
     var connection = new Connection(dbConfig);  
     connection.on('connect', function(err) {  
@@ -85,7 +84,6 @@ app.post('/register', checkNotAuthenticated, (req, res) => {
 
 
         function executeInsertUserQuery(insertUser){
-        console.log('insertUserQuery' + insertUser)
         let request = new Request(`INSERT into dbo.Users (username, password, email, telephone_number)
             VALUES ('${insertUser.username}', '${insertUser.password}', '${insertUser.email}', ${insertUser.telephone_number});`, function(err) {
             if(err){
