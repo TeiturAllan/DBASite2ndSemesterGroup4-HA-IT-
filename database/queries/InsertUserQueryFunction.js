@@ -1,3 +1,6 @@
+//can't get this function to work properly when exported, so it is coded directly into the server.js file. the code is inside the HTTP POST request that starts on line 76 
+
+
 const Connection = require('tedious').Connection;
 const dbConfig = require('../dbconfig')
 var Request = require('tedious').Request  
