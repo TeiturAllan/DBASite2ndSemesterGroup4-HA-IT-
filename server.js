@@ -25,6 +25,8 @@ let TYPES = require('tedious').TYPES
 
 //start of import from passportConfig.js
 const passportConfig = require('./passportConfig')   
+const req = require('express/lib/request')
+const res = require('express/lib/response')
 passportConfig.initialize(passport,
     email => signedInUsers.find(user => user.email === email),//defines the findUserByEmail paramater in './passportConfig.js' on line 10
     id => signedInUsers.find(user => user.id === id)//defines the findUserById paramater in './passportConfig.js' on line 10
@@ -104,6 +106,10 @@ app.post('/register', checkNotAuthenticated, (req, res) => {//checkNotAuthentica
 
 
 app.delete('/logout', (req, res) => {
+    let indexOfUserSigningOut = signedInUsers.findIndex(obj => obj.id == req.user.id) 
+    signedInUsers.splice(indexOfUserSigningOut, 1)//this line and the one above are used to remove the user information of the user that logged out from the signedInUsers array, as that user is no longer signed in
+  
+
     req.logOut()//imported function from passport.js that end the user's (user the is signing out) authentication
     res.redirect('/login')//redirects user to the login page
 })//app.delete request used for signing out
@@ -127,7 +133,33 @@ function checkNotAuthenticated(req, res, next) {//defines what happens when a us
 }
 /*the checkAuthenticated and checkNotAuthenticated functions are used, so only users that are authenticated can access the websites pages other than the login and register page.
 they are also used to insure that if a user is signed in, then he can never access the login and register page. */ 
-   
+
+
+
+app.get('/myProfile', checkAuthenticated, (req, res) => { //checkAuthenticated is a function that is defined on line 113
+    res.render('./myProfile/myProfile.ejs', { usernameDisplay: req.user.username })
+})
+
+app.get('/myProfile/updateUser', checkAuthenticated, (req, res) => { //checkAuthenticated is a function that is defined on line 113
+    res.render('./myProfile/updateUser.ejs', { usernameDisplay: req.user.username })
+})
+
+app.get('/myProfile/deleteUser', checkAuthenticated, (req, res) => { //checkAuthenticated is a function that is defined on line 113
+    res.render('./myProfile/deleteUser.ejs', { usernameDisplay: req.user.username })
+})
+
+
+app.delete('/myProfile/deleteUser', (req, res) => {
+    let userBeingDeleted = req.user
+    SignedInUser.deleteUserFromDatabase(userBeingDeleted)
+    
+    let indexOfUserSigningOut = signedInUsers.findIndex(obj => obj.id == req.user.id) 
+    signedInUsers.splice(indexOfUserSigningOut, 1)
+    req.logOut()
+    res.redirect('/login')
+})
+
+
 PORT = 3000
 app.listen(PORT)
 console.log(`Server is listening on port ${PORT}`)
