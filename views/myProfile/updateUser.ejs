@@ -1,4 +1,30 @@
 <h1>Update user</h1>
 <h2>Signed in as <%= usernameDisplay %> </h2>
 
+<form action="/myProfile/updateUser?_method=PUT" method="POST">
+    <div>
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="<%= usernameDisplay %>" required>
+    </div>
+    <div>
+        <label for="password">Password</label>
+        <input type="text" id="password" name="password" placeholder="<%= passwordDisplay %>" required>
+    </div>
+    <div>
+        <label for="telephoneNumber">Telephone number</label>
+        <input type="number" id="telephone_Number" name="telephone_Number" placeholder="<%= telephoneNumberDisplay %>"required>
+    </div>
+    <button onclick="myFunction()" type="submit">updateUser</button> 
+</form>
+
+<p>If you update your profile, you will be logged out 
+<br> 
+and have to log back in with your new information </p>
+
 <a href="/myProfile">my Profile</a>
+
+<script>
+    function myFunction() {
+      alert("User has been updated, you will now be redirected to the myProfile");
+    }
+</script>

@@ -13,6 +13,7 @@ class SignedInUser{
         this.email = email,
         this.telephone_number = telephone_number
     }
+    //start of deleteUserFromDatabase method
     static deleteUserFromDatabase(userBeingDeleted){
         var connection = new Connection(dbConfig);  
         connection.on('connect', function(err) {  
@@ -22,8 +23,6 @@ class SignedInUser{
         }); 
         connection.connect();
 
-
-
         function deleteUserQueryDefintion(userBeingDeleted){
             
             let request = new Request(`DELETE FROM dbo.Users WHERE id = '${userBeingDeleted.id}' AND username ='${userBeingDeleted.username}' AND password = '${userBeingDeleted.password}'`, function(err) {
@@ -31,18 +30,39 @@ class SignedInUser{
                     console.log(err);
                 }
             });
+    
+            request.on('done', function(rowCount, more) {  
+            console.log(rowCount + ' rows returned');  
+            }); 
+
+            request.on("requestCompleted", function (rowCount, more) {
+                connection.close();
+            });
+
+            connection.execSql(request);  
+        }    
+
+    } //end of deleteUserFromDatabase method
+
+
+
+    static executeUpdateUserInDatabase(userBeingUpdated, infoToBeUpdated){
+        var connection = new Connection(dbConfig);  
+        connection.on('connect', function(err) {  
+            // If no error, then good to proceed.
+            console.log("Connected");   
+            updateUserInDatabase(userBeingUpdated, infoToBeUpdated)
+        }); 
+        connection.connect();
+
+        function updateUserInDatabase(userBeingUpdated, infoToBeUpdated){
             
-            var result = "";  
-            request.on('row', function(columns) {  
-                columns.forEach(function(column) {  
-                if (column.value === null) {  
-                    console.log('NULL');  
-                } else {  
-                    result+= column.value + " ";  
-                }  
-            });  
-            console.log(result);  
-            result ="";  
+            let request = new Request(`Update dbo.Users 
+            SET username = '${infoToBeUpdated.username}', password = '${infoToBeUpdated.password}', telephone_number = ${infoToBeUpdated.telephone_Number}
+            WHERE id = '${userBeingUpdated.id}' `, function(err) {
+                if (err){
+                    console.log(err);
+                }
             });
     
             request.on('done', function(rowCount, more) {  
@@ -57,6 +77,8 @@ class SignedInUser{
         }    
 
     }
+    
+
 }
 
 module.exports = SignedInUser

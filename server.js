@@ -141,8 +141,18 @@ app.get('/myProfile', checkAuthenticated, (req, res) => { //checkAuthenticated i
 })
 
 app.get('/myProfile/updateUser', checkAuthenticated, (req, res) => { //checkAuthenticated is a function that is defined on line 113
-    res.render('./myProfile/updateUser.ejs', { usernameDisplay: req.user.username })
+    res.render('./myProfile/updateUser.ejs', { usernameDisplay: req.user.username, passwordDisplay: req.user.password, telephoneNumberDisplay: req.user.telephone_number })
 })
+
+
+
+app.put('/myProfile/updateUser', (req, res) => {
+    let infoToBeUpdated = {username: req.body.username, password: req.body.password, telephone_Number: req.body.telephone_Number}
+    SignedInUser.executeUpdateUserInDatabase(req.user, infoToBeUpdated)
+    req.logOut()
+    res.redirect(303, '/myProfile')
+})
+
 
 app.get('/myProfile/deleteUser', checkAuthenticated, (req, res) => { //checkAuthenticated is a function that is defined on line 113
     res.render('./myProfile/deleteUser.ejs', { usernameDisplay: req.user.username })
