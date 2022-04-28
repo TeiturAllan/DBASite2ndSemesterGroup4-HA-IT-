@@ -3,11 +3,10 @@ const dbConfig = require('../database/dbconfig')
 var Request = require('tedious').Request 
 var TYPES = require('tedious').TYPES;
 
-const session = require('express-session');
-const passport = require('passport');
 class SignedInUser{
-    constructor(id, username, password, email, telephone_number){
+    constructor(id, admin_id, username, password, email, telephone_number){
         this.id = id,
+        this.admin_id = admin_id
         this.username = username,
         this.password = password,
         this.email = email,
@@ -17,8 +16,7 @@ class SignedInUser{
     static deleteUserFromDatabase(userBeingDeleted){
         var connection = new Connection(dbConfig);  
         connection.on('connect', function(err) {  
-            // If no error, then good to proceed.
-            console.log("Connected");   
+            // If no error, then good to proceed.  
             deleteUserQueryDefintion(userBeingDeleted)
         }); 
         connection.connect();
@@ -46,16 +44,15 @@ class SignedInUser{
 
 
 
-    static executeUpdateUserInDatabase(userBeingUpdated, infoToBeUpdated){
+    static UpdateUserInDatabase(userBeingUpdated, infoToBeUpdated){
         var connection = new Connection(dbConfig);  
         connection.on('connect', function(err) {  
-            // If no error, then good to proceed.
-            console.log("Connected");   
-            updateUserInDatabase(userBeingUpdated, infoToBeUpdated)
+            // If no error, then good to proceed.  
+            executeUpdateUserInDatabase(userBeingUpdated, infoToBeUpdated)
         }); 
         connection.connect();
 
-        function updateUserInDatabase(userBeingUpdated, infoToBeUpdated){
+        function executeUpdateUserInDatabase(userBeingUpdated, infoToBeUpdated){
             
             let request = new Request(`Update dbo.Users 
             SET username = '${infoToBeUpdated.username}', password = '${infoToBeUpdated.password}', telephone_number = ${infoToBeUpdated.telephone_Number}

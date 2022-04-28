@@ -1,0 +1,26 @@
+<h1>data for selected user: <%= selectedUserData.username %></h1>
+
+<h3>data that can be edited</h3>
+<form action='/adminPage/AllUsers/<%= selectedUserData.id %>?_method=PUT' method="POST">
+    <div>
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="<%= selectedUserData.username %>" required>
+    </div>
+    <div>
+        <label for="password">Password</label>
+        <input type="text" id="password" name="password" placeholder="<%= selectedUserData.password %>" required>
+    </div>
+    <div>
+        <label for="telephoneNumber">Telephone number</label>
+        <input type="number" id="telephone_Number" name="telephone_Number" placeholder="<%= selectedUserData.telephone_number %>"required>
+    </div>
+    <button type="submit">updateUser</button> 
+</form>
+
+<h4>data that can't be edited, because it could break the database</h4>
+<p> id of selected user: <%= selectedUserData.id %></p>
+<p> Admin_ID of selected user: <%= selectedUserData.Admin_ID %></p>
+<p> email of selected user: <%= selectedUserData.email %></p>
+
+<br>
+<a href='/adminPage/AllUsers/<%= selectedUserData.id %>/deleteUser' >Delete this user</a>

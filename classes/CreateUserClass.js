@@ -1,6 +1,6 @@
 class CreateUser{
-    constructor(id, username, password, email, telephone_number){
-        this.id = id,
+    constructor(Admin_ID, username, password, email, telephone_number){
+        this.Admin_ID = Admin_ID
         this.username = username,
         this.password = password,
         this.email = email,

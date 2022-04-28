@@ -1,0 +1,30 @@
+<h1>All users</h1>
+<h2>Signed in as <%= usernameDisplay %> (admin) </h2>
+
+<h5>if you want to delete a user, simply type in that users id, email and username, and then click submit</h5>
+
+<table>
+    <tr>  
+        <td> ID </td>
+        <td> Admin_ID  </td>
+        <td> username  </td>
+        <td> password  </td>
+        <td> email  </td>
+        <td> telephone_number  </td>
+    </tr>
+    <% tableData.forEach(row => {  %>  
+     <tr>  
+        <td> <%= row.id %> </td>
+        <td> <%= row.Admin_ID %> </td>
+        <td> <%= row.username %> </td>
+        <td> <%= row.password %> </td>
+        <td> <%= row.email %> </td>
+        <td> <%= row.telephone_number %> </td>
+        <td><a href="/adminPage/AllUsers/<%=row.id%>">update this user</a></td>
+    </tr> %>
+    <% }) %>
+</table>
+
+
+<a href="/">Website homepage</a>
+<a href="/adminPage">Admin page</a>

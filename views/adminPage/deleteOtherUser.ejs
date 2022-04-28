@@ -1,0 +1,8 @@
+<h1>Delete Other User</h1>
+<h2>are you sure you want to delete the user with this id: <%= idOfUserbeingDeleted%> </h2>
+
+<a href="/adminPage/allUsers">take me back to safety</a>
+
+<form action="/adminPage/AllUsers/<%= idOfUserbeingDeleted%>/deleteUser?_method=DELETE" method="POST">
+    <button type="submit">yes, delete user</button>
+  </form> 

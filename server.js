@@ -15,18 +15,23 @@ const Connection = require('tedious').Connection;
 //start of importing classes
 let CreateUser = require('./classes/CreateUserClass.js')
 let SignedInUser = require('./classes/SignedInUserClass')
+
+
 //end of importing classes
 
 //start of importing from database and database/queries
 const dbConfig = require('./database/dbconfig')//importing data from dbConfig for db queries
 let Request = require('tedious').Request
 let TYPES = require('tedious').TYPES
+
+//let returnAllUsersFromDatabase = require('./database/queries/returnAllUsersFromDatabase')
 //end of importing from databse and database/queries
 
 //start of import from passportConfig.js
 const passportConfig = require('./passportConfig')   
 const req = require('express/lib/request')
 const res = require('express/lib/response')
+const SignedInAdmin = require('./classes/SignedInAdminClass.js')
 passportConfig.initialize(passport,
     email => signedInUsers.find(user => user.email === email),//defines the findUserByEmail paramater in './passportConfig.js' on line 10
     id => signedInUsers.find(user => user.id === id)//defines the findUserById paramater in './passportConfig.js' on line 10
@@ -76,30 +81,32 @@ app.get('/register', checkNotAuthenticated, (req, res) => {//checkNotAuthenticat
 })
 
 app.post('/register', checkNotAuthenticated, (req, res) => {//checkNotAuthenticated is function that is defined on line 122. passport.authenticate is middleware function from passport.js, and is used to authenticate a user
-    let newUser = new CreateUser(Date.now().toString(), req.body.username, req.body.password, req.body.email, req.body.telephone_number)//a new user is created using the imported class CreateUser. Date.now().toString()is used to create the ID, because the class needs an input. the object variable is ignored when pushed to database as ID is set to autoincrement there
+    let newUser = new CreateUser(1, req.body.username, req.body.password, req.body.email, req.body.telephone_number)
+    //a new user is created using the imported class CreateUser. Admin_ID is set 1 one, as 1 is the Admin_ID that corresponds to a normal user
     res.redirect('/login')//redirects the client to the login page
     var connection = new Connection(dbConfig);  //start of code that sends the new user to the database
+   
     connection.on('connect', function(err) { //defines what is supposed to happen when connection has been established with the database. this connection is established on line 84. definition ends on line 83
         // If no error, then good to proceed.  
-        console.log("Connected");  
+         
         executeInsertUserQuery(newUser); //execute the function that is whose definition starts on line 87 
     });
     connection.connect();//establishes a connection with the database
 
 
         function executeInsertUserQuery(insertUser){//start of function definition
-        let request = new Request(`INSERT into dbo.Users (username, password, email, telephone_number)
-            VALUES ('${insertUser.username}', '${insertUser.password}', '${insertUser.email}', ${insertUser.telephone_number});`, function(err) {//defines the query using the Request Class imported from Tedious.js
+        let request = new Request(`INSERT into dbo.Users (Admin_ID, username, password, email, telephone_number)
+            VALUES (${insertUser.Admin_ID}, '${insertUser.username}', '${insertUser.password}', '${insertUser.email}', ${insertUser.telephone_number});`, function(err) {//defines the query using the Request Class imported from Tedious.js
             if(err){
                 console.log(err);
             }
         })
-
+        connection.execSql(request);
         
         request.on("requestCompleted", function (rowCount, more) {//defines what happens when the database tells the server that the request (query) is complete
             connection.close();//closes the connection to the database
         });
-        connection.execSql(request); //sends the request which is defined on line 89 
+         //sends the request which is defined on line 89 
     } // end of function definition
 })
 
@@ -118,7 +125,7 @@ app.delete('/logout', (req, res) => {
 
 function checkAuthenticated(req, res, next) {//function the checks if a user is signed in on the browser, and defines what happens if a user is authenticated/signed in
     if (req.isAuthenticated()) {//if a user is signed in, then the next() function is execute
-      return next()//next is a function imported from passport.js
+      return next()//next is a functin in express.js
     }
     res.redirect('/login')//sends a HTTP GET '/login' request
 }
@@ -129,7 +136,16 @@ function checkNotAuthenticated(req, res, next) {//defines what happens when a us
     if (req.isAuthenticated()) {//if user is authenticated then the user/client is redirected to the '/' URL which is the website homepage.
       return res.redirect('/')
     }
-    next()//next is a function imported from passport.js
+    next()//next is a functin in express.js
+}
+
+
+
+function checkIfAdmin(req, res, next){
+    if (req.user instanceof SignedInAdmin){
+        return next()
+    }
+    res.redirect('/')
 }
 /*the checkAuthenticated and checkNotAuthenticated functions are used, so only users that are authenticated can access the websites pages other than the login and register page.
 they are also used to insure that if a user is signed in, then he can never access the login and register page. */ 
@@ -148,15 +164,20 @@ app.get('/myProfile/updateUser', checkAuthenticated, (req, res) => { //checkAuth
 
 app.put('/myProfile/updateUser', (req, res) => {
     let infoToBeUpdated = {username: req.body.username, password: req.body.password, telephone_Number: req.body.telephone_Number}
-    SignedInUser.executeUpdateUserInDatabase(req.user, infoToBeUpdated)
+    SignedInUser.UpdateUserInDatabase(req.user, infoToBeUpdated)
+    
+    let indexOfUserSigningOut = signedInUsers.findIndex(obj => obj.id == req.user.id) 
+    signedInUsers.splice(indexOfUserSigningOut, 1)
     req.logOut()
     res.redirect(303, '/myProfile')
 })
 
 
+
 app.get('/myProfile/deleteUser', checkAuthenticated, (req, res) => { //checkAuthenticated is a function that is defined on line 113
     res.render('./myProfile/deleteUser.ejs', { usernameDisplay: req.user.username })
 })
+
 
 
 app.delete('/myProfile/deleteUser', (req, res) => {
@@ -170,6 +191,144 @@ app.delete('/myProfile/deleteUser', (req, res) => {
 })
 
 
+
+app.get('/adminPage', checkAuthenticated, checkIfAdmin, (req, res) => {
+    res.render('./adminPage/adminPage.ejs', { usernameDisplay: req.user.username })
+})//figure out how to send an error message to the client if the user that is trying to access the admin page is not an admin
+
+
+
+app.get('/adminPage/allUsers', checkAuthenticated, checkIfAdmin, (req, res) => {
+    let arrayWithAllUsers = returnAllUsersFromDatabase()
+    //console.log('arrayWithAllUsers')
+    //console.log(arrayWithAllUsers)
+    
+    
+    //temporary solution
+    function returnAllUsersFromDatabase(){
+        var connection = new Connection(dbConfig);  
+        connection.on('connect', function(err) {  
+            // If no error, then good to proceed.
+            executeReturnAllUsersFromDatabase()
+        }); 
+        connection.connect();
+        allUsersInDoubleArray = []
+    
+        function executeReturnAllUsersFromDatabase(){
+            let request = new Request(`SELECT * FROM dbo.Users FOR JSON AUTO`, function(err) {
+                if (err){
+                    console.log(err);
+             }
+            });
+    
+            var result = "";  
+            request.on('row', function(columns) {  
+                columns.forEach(function(column) {  
+                if (column.value === null) {  
+                    console.log('NULL');  
+                    } else {  
+                        result+= column.value + " ";  
+                    }  
+                });  
+            resultParsed = JSON.parse(result)
+            allUsersInDoubleArray.push(resultParsed)
+            result ="";  
+            });
+        
+            request.on('done', function(rowCount, more) {  
+            console.log(rowCount + ' rows returned');  
+            }); 
+    
+            request.on("requestCompleted", function (rowCount, more) {
+                connection.close();
+                let allUsersInArray = allUsersInDoubleArray.shift()
+                res.render('./adminPage/seeAllusers.ejs', { usernameDisplay: req.user.username, tableData: allUsersInArray })
+            });
+    
+            connection.execSql(request);  
+        }
+    }
+})
+
+
+
+app.get('/adminPage/AllUsers/:id', checkAuthenticated, checkIfAdmin, (req, res) => {
+    dataOfSelectedUserInArray = []
+    
+    var connection = new Connection(dbConfig);  
+        connection.on('connect', function(err) {  
+        // If no error, then good to proceed. 
+        findDataOfSelectedUser()
+        }); 
+    connection.connect();
+
+
+    function findDataOfSelectedUser(){
+        let request = new Request(`SELECT * FROM dbo.Users WHERE id ='${req.params.id}' FOR JSON AUTO;`, function(err) {
+            if (err){
+                console.log(err);
+            }
+        });
+
+        var result = "";  
+        request.on('row', function(columns) {  
+            columns.forEach(function(column) {  
+                if (column.value === null) {  
+                    console.log('NULL');  
+                } else {  
+                    result+= column.value + " ";  
+                }  
+            });  
+            dataOfSelectedUserParsed = JSON.parse(result);
+            dataOfSelectedUserAsObject = dataOfSelectedUserParsed.shift();
+            dataOfSelectedUserInArray.push(dataOfSelectedUserAsObject);      
+            result ="";  
+        });
+    
+        request.on('done', function(rowCount, more) {  
+            console.log(rowCount + ' rows returned');  
+        }); 
+
+        request.on("requestCompleted", function (rowCount, more) {
+            connection.close();
+            let dataOfSelectedUserToBeSentToClient = dataOfSelectedUserInArray.shift()
+            res.render('./adminPage/updateOrDeleteSelectedUser.ejs', {selectedUserData: dataOfSelectedUserToBeSentToClient})
+        });
+
+        connection.execSql(request);  
+    }    
+})
+
+
+
+app.put('/adminPage/AllUsers/:id', checkAuthenticated, checkIfAdmin, (req, res) => {
+    let infoToBeUpdated = {username: req.body.username, password: req.body.password, telephone_Number: req.body.telephone_Number}
+    let userToBeUpdated = req.params.id;
+    SignedInAdmin.UpdateOtherUserInDatabase(userToBeUpdated, infoToBeUpdated)
+    
+    
+    res.redirect(303, '/adminPage/allUsers')
+})
+
+
+
+app.get("/adminPage/AllUsers/:id/deleteUser", checkAuthenticated, checkIfAdmin, (req, res) => {
+    res.render('./adminPage/deleteOtherUser.ejs', {idOfUserbeingDeleted: req.params.id })
+})
+
+
+
+app.delete('/adminPage/AllUsers/:id/deleteUser', (req, res) => {
+    SignedInAdmin.deleteOtherUserFromDatabase(req.params.id)
+    
+    res.redirect('/adminPage/allUsers')
+})
+
+
 PORT = 3000
 app.listen(PORT)
 console.log(`Server is listening on port ${PORT}`)
+
+
+
+

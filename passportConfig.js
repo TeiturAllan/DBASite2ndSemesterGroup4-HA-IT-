@@ -1,7 +1,11 @@
 //the code in this file is used for the login/authentication of user.
 const Connection = require('tedious').Connection;//import from tedious which is used to connect to MSSQL database
 let SignedInUser = require('./classes/SignedInUserClass')//class imported from './classas/SignedInUser
-const dbConfig = require('./database/dbconfig')//importing data from dbConfig for db queries
+let SignedInAdmin = require('./classes/SignedInAdminClass')
+
+
+const dbConfig = require('./database/dbconfig');//importing data from dbConfig for db queries
+const Null = require('tedious/lib/data-types/null');
 let Request = require('tedious').Request//class imported from tedious to create SQL queries in node.js and then send them to an SQL database
 let TYPES = require('tedious').TYPES
 const LocalStrategy = require('passport-local').Strategy//class imported from passport.js
@@ -12,10 +16,11 @@ function initialize(passport, getUserByEmail, getUserById) {//function which is 
 //this function defines and calls several functions that are used in the authentication process 
   
   const authenticateUser = (email, password, done) => {//the defintion of the authenticate user function, which is call on line 70 
-    var connection = new Connection(dbConfig);  
+    var connection = new Connection(dbConfig); 
+    connection.connect();//creates the connection to the database
+    
       connection.on('connect', function(err) {  //start of definition of what happens when connected to database
-          // If no error, then good to proceed.
-          console.log("Connected");   
+          // If no error, then good to proceed.   
           let request = new Request(`SELECT * FROM dbo.Users WHERE email = '${email}' AND password = '${password}'FOR JSON AUTO`, function(err) {//the creation of the query that is sent to the database. FOR JSON AUTO means that the data is return in a JSON format
             if (err){
                 console.log(err);
@@ -33,15 +38,14 @@ function initialize(passport, getUserByEmail, getUserById) {//function which is 
         });  
         let userGoingToSignInArray = JSON.parse(result)//this takes the JSON data in the result variable and turns it into normal JS array and saves it as the userGoingToSignInArray variable
         let userGoingToSignIn = userGoingToSignInArray.shift()//this then takes the variable created above and removes the object/element within the array, so that it is a normal object. this is necessary because the next line of code does not work if the data is in an array.
-        let userSigningIn = new SignedInUser(userGoingToSignIn.id, userGoingToSignIn.username, userGoingToSignIn.password, userGoingToSignIn.email, userGoingToSignIn.telephone_number)//this line takes the data from the object above and uses it to create a new SignedInUser Class object.
-        
-        signedInUsers.push(userSigningIn)//the Class object created on line 36 is pushed to the signedInUsers array, where it can then be read and authenticated
+        decideUserTypeForSigningIn(userGoingToSignIn)
+        //the Class object created on line 36 is pushed to the signedInUsers array, where it can then be read and authenticated
         result ="";//this returns the variable to it's original empty value
         });
     
-        request.on('done', function(rowCount, more) {
+       /* request.on('done', function(rowCount, more) {
         console.log(rowCount + ' rows returned');
-        }); 
+        });*/ 
     
         request.on("requestCompleted", function (rowCount, more) {//defining what happens when the database returns the message 'requestCompleted'
           authenticateUserAnswer()//runs the authenticateUserAnswer function that is defined on line 54
@@ -59,12 +63,21 @@ function initialize(passport, getUserByEmail, getUserById) {//function which is 
           } else {//if a user is found inside the user variable then the next line of code happens
             return done(null, user)//the user is verified and there sent to be authenticated
           }
+        }//end of authenticateUserAnswer definition
+
+        function decideUserTypeForSigningIn(userGoingToSignIn) {
+          if(userGoingToSignIn.Admin_ID === 1){
+            let userSigningIn = new SignedInUser(userGoingToSignIn.id, userGoingToSignIn.Admin_ID, userGoingToSignIn.username, userGoingToSignIn.password, userGoingToSignIn.email, userGoingToSignIn.telephone_number)
+            signedInUsers.push(userSigningIn)
+          } else {
+            let userSigningIn = new SignedInAdmin(userGoingToSignIn.id, userGoingToSignIn.Admin_ID, userGoingToSignIn.username, userGoingToSignIn.password, userGoingToSignIn.email, userGoingToSignIn.telephone_number) 
+            signedInUsers.push(userSigningIn)
+          }
         }
         
       
-          
+        
       }); //end of what happens when connected to datase
-      connection.connect();//creates the connection to the database
   }
 
   passport.use(new LocalStrategy({ usernameField: 'email' }, authenticateUser))//
