@@ -1,10 +1,11 @@
 class CreateUser{
-    constructor(Admin_ID, username, password, email, telephone_number){
-        this.Admin_ID = Admin_ID
+    constructor(adminRankID, goldmemberRankID, username, password, email, telephoneNumber){
+        this.adminRankID = adminRankID,
+        this.goldmemberRankID = goldmemberRankID
         this.username = username,
         this.password = password,
         this.email = email,
-        this.telephone_number = telephone_number
+        this.telephoneNumber = telephoneNumber
     }
 }
 

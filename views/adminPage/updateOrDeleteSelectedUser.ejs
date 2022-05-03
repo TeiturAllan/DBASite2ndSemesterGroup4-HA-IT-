@@ -12,15 +12,20 @@
     </div>
     <div>
         <label for="telephoneNumber">Telephone number</label>
-        <input type="number" id="telephone_Number" name="telephone_Number" placeholder="<%= selectedUserData.telephone_number %>"required>
+        <input type="number" id="telephoneNumber" name="telephoneNumber" placeholder="<%= selectedUserData.telephoneNumber %>"required>
+    </div>
+    <div>
+        <label for="goldmemberRankID">goldmemberRankID </label>
+        <input type="number" id="goldmemberRankID" name="goldmemberRankID" placeholder="<%= selectedUserData.goldmemberRankID %>"required>
     </div>
     <button type="submit">updateUser</button> 
 </form>
 
 <h4>data that can't be edited, because it could break the database</h4>
 <p> id of selected user: <%= selectedUserData.id %></p>
-<p> Admin_ID of selected user: <%= selectedUserData.Admin_ID %></p>
+<p> adminRankID of selected user: <%= selectedUserData.adminRankID %></p>
 <p> email of selected user: <%= selectedUserData.email %></p>
 
 <br>
 <a href='/adminPage/AllUsers/<%= selectedUserData.id %>/deleteUser' >Delete this user</a>
+

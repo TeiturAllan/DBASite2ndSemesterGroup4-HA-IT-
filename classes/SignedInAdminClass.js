@@ -6,8 +6,8 @@ var TYPES = require('tedious').TYPES;
 let SignedInUser = require('./SignedInUserClass')
 
 class SignedInAdmin extends SignedInUser{
-    constructor(id, admin_id, username, password, email, telephone_number){
-        super(id, admin_id, username, password, email, telephone_number)
+    constructor(id, adminRankID, goldmemberRankID, username, password, email, telephoneNumber){
+        super(id, adminRankID, goldmemberRankID, username, password, email, telephoneNumber)
         
         
     }
@@ -21,9 +21,8 @@ class SignedInAdmin extends SignedInUser{
         connection.connect();
 
         function executeUpdateOtherUserInDatabase(idOfUserBeingUpdated, infoToBeUpdated){
-            
             let request = new Request(`Update dbo.Users 
-            SET username = '${infoToBeUpdated.username}', password = '${infoToBeUpdated.password}', telephone_number = ${infoToBeUpdated.telephone_Number}
+            SET username = '${infoToBeUpdated.username}', password = '${infoToBeUpdated.password}', telephoneNumber = ${infoToBeUpdated.telephoneNumber}, goldmemberRankID = ${infoToBeUpdated.goldmemberRankID}
             WHERE id = '${idOfUserBeingUpdated}' `, function(err) {
                 if (err){
                     console.log(err);

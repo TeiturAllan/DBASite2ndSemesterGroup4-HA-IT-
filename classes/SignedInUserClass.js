@@ -4,13 +4,14 @@ var Request = require('tedious').Request
 var TYPES = require('tedious').TYPES;
 
 class SignedInUser{
-    constructor(id, admin_id, username, password, email, telephone_number){
+    constructor(id, adminRankID, goldmemberRankID, username, password, email, telephoneNumber){
         this.id = id,
-        this.admin_id = admin_id
+        this.adminRankID = adminRankID,
+        this.goldmemberRankID = goldmemberRankID
         this.username = username,
         this.password = password,
         this.email = email,
-        this.telephone_number = telephone_number
+        this.telephoneNumber = telephoneNumber
     }
     //start of deleteUserFromDatabase method
     static deleteUserFromDatabase(userBeingDeleted){
@@ -55,7 +56,7 @@ class SignedInUser{
         function executeUpdateUserInDatabase(userBeingUpdated, infoToBeUpdated){
             
             let request = new Request(`Update dbo.Users 
-            SET username = '${infoToBeUpdated.username}', password = '${infoToBeUpdated.password}', telephone_number = ${infoToBeUpdated.telephone_Number}
+            SET username = '${infoToBeUpdated.username}', password = '${infoToBeUpdated.password}', telephoneNumber = ${infoToBeUpdated.telephoneNumber}
             WHERE id = '${userBeingUpdated.id}' `, function(err) {
                 if (err){
                     console.log(err);
@@ -75,7 +76,35 @@ class SignedInUser{
 
     }
     
+    static createListing(createdListing){
+        var connection = new Connection(dbConfig);  
+        connection.on('connect', function(err) {  
+            // If no error, then good to proceed.
+            console.log("Connected");   
+            insertCreatedListingIntoDatabase(createdListing)
+        }); 
+        connection.connect();
+
+
+        function insertCreatedListingIntoDatabase(createdListing){
+            let request = new Request(`INSERT into dbo.Listings (listingTitle, listingDescription, listingOwnerUserID, categoryID, price, listingPictureURL, productCondition, city, listingsOwnerGoldmemberRank)
+                VALUES ('${createdListing.listingTitle}', '${createdListing.listingDescription}', ${createdListing.listingOwnerUserID}, '${createdListing.categoryID}', '${createdListing.price}', '${createdListing.listingPictureURL}', '${createdListing.productConditionRankID}', '${createdListing.city}', ${createdListing.listingsOwnerGoldmemberRank});`, function(err) {//defines the query using the Request Class imported from Tedious.js
+                if(err){
+                    console.log(err);
+                }
+            })
+            connection.execSql(request);
+            
+            request.on("requestCompleted", function (rowCount, more) {//defines what happens when the database tells the server that the request (query) is complete
+                connection.close();//closes the connection to the database
+            });
+             
+        }
+            
+    }
 
 }
 
 module.exports = SignedInUser
+
+    

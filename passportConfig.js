@@ -66,11 +66,11 @@ function initialize(passport, getUserByEmail, getUserById) {//function which is 
         }//end of authenticateUserAnswer definition
 
         function decideUserTypeForSigningIn(userGoingToSignIn) {
-          if(userGoingToSignIn.Admin_ID === 1){
-            let userSigningIn = new SignedInUser(userGoingToSignIn.id, userGoingToSignIn.Admin_ID, userGoingToSignIn.username, userGoingToSignIn.password, userGoingToSignIn.email, userGoingToSignIn.telephone_number)
+          if(userGoingToSignIn.adminRankID === 1){
+            let userSigningIn = new SignedInUser(userGoingToSignIn.id, userGoingToSignIn.adminRankID, userGoingToSignIn.goldmemberRankID, userGoingToSignIn.username, userGoingToSignIn.password, userGoingToSignIn.email, userGoingToSignIn.telephoneNumber)
             signedInUsers.push(userSigningIn)
           } else {
-            let userSigningIn = new SignedInAdmin(userGoingToSignIn.id, userGoingToSignIn.Admin_ID, userGoingToSignIn.username, userGoingToSignIn.password, userGoingToSignIn.email, userGoingToSignIn.telephone_number) 
+            let userSigningIn = new SignedInAdmin(userGoingToSignIn.id, userGoingToSignIn.adminRankID, userGoingToSignIn.goldmemberRankID, userGoingToSignIn.username, userGoingToSignIn.password, userGoingToSignIn.email, userGoingToSignIn.telephoneNumber) 
             signedInUsers.push(userSigningIn)
           }
         }
