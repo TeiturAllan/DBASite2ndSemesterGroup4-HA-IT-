@@ -38,6 +38,59 @@ router.post('/createNewListing', permissionHandler.checkAuthenticated, (req, res
     res.redirect('/listings')
 })
 
+router.get('/viewListings', permissionHandler.checkAuthenticated, (req, res) => {
+        listingsInDoubleArray = []
+        var connection = new Connection(dbConfig);  
+        connection.on('connect', function(err) {  
+            // If no error, then good to proceed.
+            queryFullOuterJoinListingsAndUsers()
+        }); 
+        connection.connect();
+        
+    
+        function queryFullOuterJoinListingsAndUsers(){
+            let request = new Request(`SELECT [dbo].[Listings].listingID, [dbo].[Listings].listingTitle, [dbo].[Listings].listingDescription, [dbo].[Users].username, [dbo].[Users].telephoneNumber, [dbo].[Users].email, [Users].goldmemberRankID, [dbo].[Listing_Categories].categoryName, [dbo].[Listings].price, [dbo].[Listings].listingPictureURL, [dbo].[Listings].productCondition, [dbo].[Listings].city
+            FROM [dbo].[Listings]
+            JOIN [dbo].[Users]
+            ON [dbo].[Listings].listingOwnerUserID = [dbo].[Users].ID
+            JOIN [dbo].[Listing_Categories]
+            on [dbo].[Listings].categoryID = [dbo].[Listing_Categories].categoryID FOR JSON PATH`, function(err) {
+                if (err){
+                    console.log(err);
+             }
+            });
+    
+            var result = "";  
+            request.on('row', function(columns) {  
+                columns.forEach(function(column) {  
+                if (column.value === null) {  
+                    console.log('NULL');  
+                    } else {  
+                        result+= column.value + " ";  
+                    }  
+                }); 
+            resultParsed = JSON.parse(result)
+            listingsInDoubleArray.push(resultParsed)
+            console.log('listingsInDoubleArray', listingsInDoubleArray)
+            result ="";  
+            });
+        
+            request.on('done', function(rowCount, more) {  
+            console.log(rowCount + ' rows returned');  
+            }); 
+    
+            request.on("requestCompleted", function (rowCount, more) {
+                connection.close();
+                let listingsInSingleArray = listingsInDoubleArray.shift()
+                console.log('listingsInSingleArray', listingsInSingleArray)
+                res.render('./listings/viewListings.ejs', { listingsData: listingsInSingleArray })
+            });
+    
+            connection.execSql(request);  
+        }
+    
+})
+
 
 
 

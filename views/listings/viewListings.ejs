@@ -1,0 +1,19 @@
+<h1>View Listings </h1>
+
+<% listingsData.forEach(singleListing => { %>
+    <div style="background:brown">
+        <p><%= singleListing.listingTitle %> </p>
+        <p><%= singleListing.price %>DDK </p>
+        <p><%= singleListing.listingDescription %> </p>
+        <p><%= singleListing.productCondition %> </p>
+        <p><%= singleListing.city %> </p>
+        <p>Seller: <%= singleListing.username %> </p>
+        <p><%= singleListing.telephoneNumber %> </p>
+        <p><%= singleListing.email %> </p>
+        <p><%= singleListing.listingPictureURL %> </p>
+    </div>
+    <br>
+    <br>
+    <br>
+    
+<% }) %>
