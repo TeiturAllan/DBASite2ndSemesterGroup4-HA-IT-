@@ -3,6 +3,12 @@ const dbConfig = require('../database/dbconfig')
 var Request = require('tedious').Request 
 var TYPES = require('tedious').TYPES;
 
+
+const multer = require('multer')
+const multerConfig = require('../multerConfig')
+
+
+
 class SignedInUser{
     constructor(id, adminRankID, goldmemberRankID, username, password, email, telephoneNumber){
         this.id = id,
@@ -103,6 +109,64 @@ class SignedInUser{
             
     }
 
+    static UpdateListingInDatabase(listingBeingUpdated, infoToBeUpdated){
+        var connection = new Connection(dbConfig);  
+        connection.on('connect', function(err) {  
+            // If no error, then good to proceed.  
+            executeUpdateListingInDatabase(listingBeingUpdated, infoToBeUpdated)
+        }); 
+        connection.connect();
+
+        function executeUpdateListingInDatabase(listingBeingUpdated, infoToBeUpdated){
+            
+            let request = new Request(`Update dbo.Listings 
+            SET listingTitle = '${infoToBeUpdated.listingTitle}', listingDescription = '${infoToBeUpdated.listingDescription}', price = ${infoToBeUpdated.price}, city = '${infoToBeUpdated.city}'
+            WHERE listingID = '${listingBeingUpdated}' `, function(err) {
+                if (err){
+                    console.log(err);
+                }
+            });
+    
+            request.on('done', function(rowCount, more) {  
+            console.log(rowCount + ' rows returned');  
+            }); 
+
+            request.on("requestCompleted", function (rowCount, more) {
+                connection.close();
+            });
+
+            connection.execSql(request);  
+        }    
+
+    }
+
+    static deleteListing(listingID){
+        var connection = new Connection(dbConfig);  
+        connection.on('connect', function(err) {  
+            // If no error, then good to proceed.  
+            executeDeleteListing(listingID)
+        }); 
+        connection.connect();
+
+        function executeDeleteListing(listingID){
+            
+            let request = new Request(`DELETE FROM dbo.Listings where listingID = ${listingID};`, function(err) {
+                if (err){
+                    console.log(err);
+                }
+            });
+    
+            request.on('done', function(rowCount, more) {  
+            console.log(rowCount + ' rows returned');  
+            }); 
+
+            request.on("requestCompleted", function (rowCount, more) {
+                connection.close();
+            });
+
+            connection.execSql(request);  
+        } 
+    }
 }
 
 module.exports = SignedInUser

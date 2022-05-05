@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+router.use(express.static(__dirname + 'public'));
 
 
 const permissionHandler = require('../permissionHandlers/permissionHandlers')
@@ -14,6 +14,15 @@ const dbConfig = require('../database/dbconfig');//importing data from dbConfig 
 let Request = require('tedious').Request
 let TYPES = require('tedious').TYPES
 //end of importing from database and database/queries
+
+
+
+//multer is used for uploading and loading images for listings
+const multer = require("multer");
+const multerConfig = require('../multerConfig')
+
+//multer is used for uploading and loading images for listings
+
 
 
 listingsArray = []
@@ -31,8 +40,8 @@ router.get('/createNewListing', permissionHandler.checkAuthenticated, (req, res)
 
 
 
-router.post('/createNewListing', permissionHandler.checkAuthenticated, (req, res) => {
-    let newListing = new Listing('id is created in database', req.body.listingTitle, req.body.listingDescription, req.user.id, req.user.goldmemberRankID, req.body.listingCategory, req.body.price, 'create the option to upload Images', req.body.productConditionRankID, req.body.city, 'timestamp is created in database')
+router.post('/createNewListing', permissionHandler.checkAuthenticated, multerConfig.upload.single('image'), (req, res) => {
+    let newListing = new Listing('id is created in database', req.body.listingTitle, req.body.listingDescription, req.user.id, req.user.goldmemberRankID, req.body.listingCategory, req.body.price, `../../public/${req.file.originalname}` , req.body.productConditionRankID, req.body.city, 'timestamp is created in database')
     listingsArray.push(newListing)
     SignedInUser.createListing(newListing)
     res.redirect('/listings')
@@ -49,12 +58,14 @@ router.get('/viewListings', permissionHandler.checkAuthenticated, (req, res) => 
         
     
         function queryFullOuterJoinListingsAndUsers(){
-            let request = new Request(`SELECT [dbo].[Listings].listingID, [dbo].[Listings].listingTitle, [dbo].[Listings].listingDescription, [dbo].[Users].username, [dbo].[Users].telephoneNumber, [dbo].[Users].email, [Users].goldmemberRankID, [dbo].[Listing_Categories].categoryName, [dbo].[Listings].price, [dbo].[Listings].listingPictureURL, [dbo].[Listings].productCondition, [dbo].[Listings].city
+            let request = new Request(`SELECT [dbo].[Listings].listingID, [dbo].[Listings].listingTitle, [dbo].[Listings].listingDescription, [dbo].[Users].username, [dbo].[Users].telephoneNumber, [dbo].[Users].email, [Users].goldmemberRankID, [dbo].[Listing_Categories].categoryName, [dbo].[Listings].price, [dbo].[Listings].listingPictureURL, [dbo].[Listings].productCondition, [dbo].[Listings].city, [dbo].[Listings].listingPosted
             FROM [dbo].[Listings]
             JOIN [dbo].[Users]
             ON [dbo].[Listings].listingOwnerUserID = [dbo].[Users].ID
             JOIN [dbo].[Listing_Categories]
-            on [dbo].[Listings].categoryID = [dbo].[Listing_Categories].categoryID FOR JSON PATH`, function(err) {
+            on [dbo].[Listings].categoryID = [dbo].[Listing_Categories].categoryID
+            ORDER BY [dbo].[Users].goldmemberRankID DESC
+            FOR JSON PATH`, function(err) {
                 if (err){
                     console.log(err);
              }
@@ -71,7 +82,6 @@ router.get('/viewListings', permissionHandler.checkAuthenticated, (req, res) => 
                 }); 
             resultParsed = JSON.parse(result)
             listingsInDoubleArray.push(resultParsed)
-            console.log('listingsInDoubleArray', listingsInDoubleArray)
             result ="";  
             });
         
@@ -82,7 +92,6 @@ router.get('/viewListings', permissionHandler.checkAuthenticated, (req, res) => 
             request.on("requestCompleted", function (rowCount, more) {
                 connection.close();
                 let listingsInSingleArray = listingsInDoubleArray.shift()
-                console.log('listingsInSingleArray', listingsInSingleArray)
                 res.render('./listings/viewListings.ejs', { listingsData: listingsInSingleArray })
             });
     

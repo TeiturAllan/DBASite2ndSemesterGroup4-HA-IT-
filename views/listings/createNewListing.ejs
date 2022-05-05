@@ -2,7 +2,7 @@
 <h2>Signed in as <%= usernameDisplay %></h2>
 <a href="/listings">Listings</a>
 
-<form action="/listings/createNewListing" method="POST">
+<form action="/listings/createNewListing" method="POST" enctype="multipart/form-data">
     <div>
         <label for="listingTitle">listing title</label>
         <input type="text" id="listingTitle" name="listingTitle" required>
@@ -38,6 +38,10 @@
     <div>
         <label for="city">city</label>
         <input type="text" id="city" name="city" required>
+    </div>
+    <div>
+        <label>Upload image</label>
+        <input type="file" id="image" name="image">
     </div>
     <button type="submit">createListing</button>
 </form>

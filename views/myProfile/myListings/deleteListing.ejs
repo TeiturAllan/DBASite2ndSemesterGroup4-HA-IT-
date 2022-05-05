@@ -1,0 +1,7 @@
+<h1>ID of selected listing, which will be deleted: <%= idOfSelectedListing %></h1>
+
+<form action="/myProfile/myListings/<%= idOfSelectedListing %>/deleteListing?_method=DELETE" method="POST">
+    <button type="submit">yes, delete listing</button>
+  </form> 
+
+<a href='/myProfile/myListings/<%= idOfSelectedListing %>' >no, take me back to safety</a>

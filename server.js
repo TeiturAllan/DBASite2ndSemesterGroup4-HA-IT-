@@ -19,7 +19,7 @@ app.use(session({secret: process.env.SESSION_SECRET, resave: false, saveUninitia
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
-
+app.use('/public', express.static('public'));
 
 
 //start of importing permissionhandlers

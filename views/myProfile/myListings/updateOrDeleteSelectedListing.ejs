@@ -1,0 +1,23 @@
+<h1>title of selected listing: <%= selectedListingData.listingTitle %> </h1>
+
+<form action="/myProfile/myListings/<%=selectedListingData.listingID %>?_method=PUT" method="POST">
+    <div>
+        <label for="listingTitle">listing title</label>
+        <input type="text" id="listingTitle" name="listingTitle" required>
+    </div>
+    <div>
+        <label for="listingDescription">listing description</label>
+        <input type="text" id="listingDescription" name="listingDescription" required>
+    </div>
+    <div>
+        <label for="price">Price</label>
+        <input type="number" id="price" name="price" required>
+    </div>
+    <div>
+        <label for="city">city</label>
+        <input type="text" id="city" name="city" required>
+    </div>
+    <button type="submit">Update this listing</button>
+</form>
+
+<a href='/myProfile/myListings/<%= selectedListingData.listingID %>/deleteListing' >Delete this listing</a>

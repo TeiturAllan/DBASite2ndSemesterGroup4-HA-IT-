@@ -1,7 +1,9 @@
-<h1>View Listings </h1>
+<h1>My listings</h1>
+<h2><%= usernameDisplay%></h2>
 
-<% listingsData.forEach(singleListing => { %>
+<% listings.forEach(singleListing => { %>
     <div style="background:brown">
+        <td><a href="/myProfile/myListings/<%=singleListing.listingID%>">update this listing</a></td>
         <p><%= singleListing.listingTitle %> </p>
         <p><%= singleListing.listingDescription %> </p>
         <p><%= singleListing.price %>DDK </p>
@@ -11,11 +13,10 @@
         <p><%= singleListing.telephoneNumber %> </p>
         <p><%= singleListing.email %> </p>
         <p><%= singleListing.listingPosted %> </p>
-        <img src="<%= singleListing.listingPictureURL %>" alt="something went wrong when loading the image" id="image"  >
+        <img src="<%= singleListing.listingPictureURL %>" alt="something went wrong when loading the image">
     </div>
     <br>
     <br>
     <br>
     
 <% }) %>
-
