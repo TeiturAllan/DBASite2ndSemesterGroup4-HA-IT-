@@ -147,6 +147,103 @@ router.delete('/AllUsers/:id/deleteUser', permissionHandler.checkAuthenticated, 
     res.redirect('/adminPage/allUsers')
 })
 
+
+
+router.get('/userStatistics', permissionHandler.checkAuthenticated, permissionHandler.checkIfAdmin, (req, res)=> {
+    var connection = new Connection(dbConfig);  
+    connection.on('connect', function(err) {  
+        // If no error, then good to proceed.
+        executeReturnUserStats()
+        
+    }); 
+    connection.connect();
+    allDataInDoubleArray = []
+    ListingsAmountTotalInDoubleArray = []
+    
+    
+    function executeReturnUserStats(){
+        let request = new Request(`SELECT u.username, COUNT(l.listingID) AS numberOfListings
+        FROM [dbo].[Users] AS u
+        LEFT OUTER JOIN [dbo].[Listings] AS l
+        ON u.id = l.listingOwnerUserID
+        GROUP BY u.username
+        ORDER BY COUNT(l.listingID) DESC
+        FOR JSON PATH`, function(err) {
+            if (err){
+                console.log(err);
+            }
+        });
+    
+        var result = "";  
+        request.on('row', function(columns) {  
+            columns.forEach(function(column) {  
+            if (column.value === null) {  
+                console.log('NULL');  
+            } else {  
+                result+= column.value + " ";  
+            }  
+            });  
+        
+            resultParsed = JSON.parse(result)
+            allDataInDoubleArray.push(resultParsed)
+            result ="";  
+        });
+        
+        request.on('done', function(rowCount, more) {  
+        console.log(rowCount + ' rows returned');  
+        }); 
+    
+        request.on("requestCompleted", function (rowCount, more) {
+            executeTotalNumberOfListings()
+        });
+    
+            connection.execSql(request);  
+        }
+        //end of executeReturnUserStats
+        
+        
+        function executeTotalNumberOfListings(){
+            let request = new Request(`SELECT COUNT(listingID) AS listingsTotal
+            FROM [dbo].[Listings]
+            FOR JSON AUTO`, function(err) {
+                if (err){
+                    console.log(err);
+                }
+            });
+        
+            var result = "";  
+            request.on('row', function(columns) {  
+                columns.forEach(function(column) {  
+                if (column.value === null) {  
+                    console.log('NULL');  
+                } else {  
+                    result+= column.value + " ";  
+                }  
+                });  
+            
+                resultParsed = JSON.parse(result)
+                ListingsAmountTotalInDoubleArray.push(resultParsed)
+                result ="";  
+            });
+            
+            request.on('done', function(rowCount, more) {  
+            console.log(rowCount + ' rows returned');  
+            }); 
+        
+            request.on("requestCompleted", function (rowCount, more) {
+                connection.close();
+                let allDataInArray = allDataInDoubleArray.shift()
+                let listingTotalInArray = ListingsAmountTotalInDoubleArray.shift()
+                let listingsTotal = listingTotalInArray.shift()
+                console.log(listingsTotal)
+                res.render('./adminPage/userStatistics.ejs', { tableData: allDataInArray, listingsTotal: listingsTotal })
+            });
+        
+                connection.execSql(request);  
+            }
+    
+})
+
 module.exports = router
 
  

@@ -1,0 +1,16 @@
+<h1>User statistics </h1>
+
+
+<h6>Total amount of listings: <%= listingsTotal.listingsTotal %></h6>
+<table>
+    <tr>  
+        <td> Username  </td>
+        <td> Number of Listings </td>
+    </tr>
+    <% tableData.forEach(row => {  %>  
+     <tr>  
+        <td> <%= row.username %> </td>
+        <td> <%= row.numberOfListings %> </td>
+    </tr> %>
+    <% }) %>
+</table>
