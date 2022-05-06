@@ -47,8 +47,10 @@ router.post('/createNewListing', permissionHandler.checkAuthenticated, multerCon
     res.redirect('/listings')
 })
 
-router.get('/viewListings', permissionHandler.checkAuthenticated, (req, res) => {
+router.get('/viewListings/:categoryID', permissionHandler.checkAuthenticated, (req, res) => {
         listingsInDoubleArray = []
+        categoryID = req.params.categoryID
+        let listingCategoryDisplay = listingCategoryDisplayDecider(categoryID)
         var connection = new Connection(dbConfig);  
         connection.on('connect', function(err) {  
             // If no error, then good to proceed.
@@ -64,6 +66,7 @@ router.get('/viewListings', permissionHandler.checkAuthenticated, (req, res) => 
             ON [dbo].[Listings].listingOwnerUserID = [dbo].[Users].ID
             JOIN [dbo].[Listing_Categories]
             on [dbo].[Listings].categoryID = [dbo].[Listing_Categories].categoryID
+            WHERE [dbo].[Listings].categoryID = ${categoryID}
             ORDER BY [dbo].[Users].goldmemberRankID DESC
             FOR JSON PATH`, function(err) {
                 if (err){
@@ -92,12 +95,34 @@ router.get('/viewListings', permissionHandler.checkAuthenticated, (req, res) => 
             request.on("requestCompleted", function (rowCount, more) {
                 connection.close();
                 let listingsInSingleArray = listingsInDoubleArray.shift()
-                res.render('./listings/viewListings.ejs', { listingsData: listingsInSingleArray })
+                res.render('./listings/viewListings.ejs', { listingsData: listingsInSingleArray, listingCategoryDisplay: listingCategoryDisplay })
             });
     
             connection.execSql(request);  
         }
-    
+        
+        //Decides what the browser should display as the shown category
+    function listingCategoryDisplayDecider(categoryID){
+        if(categoryID == 1){
+            return 'Car'
+        } if(categoryID == 2){
+            return 'Truck'
+        }if(categoryID == 3){
+            return 'Motorcycle'
+        }if(categoryID == 4){
+            return 'Bicycle'
+        }if(categoryID == 5){
+            return 'ATV'
+        }
+        
+    }
+})
+
+
+
+router.post('/viewListings/:listingID', permissionHandler.checkAuthenticated, (req, res) =>{
+    SignedInUser.followAListing(req.user.id, req.params.listingID)
+    res.send('success').status(200)
 })
 
 

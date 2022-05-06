@@ -181,4 +181,56 @@ router.delete('/myListings/:listingID/deleteListing', permissionHandler.checkAut
 
     res.redirect('/myProfile/myListings')
 })
+
+
+
+router.get('/listingsIFollow', permissionHandler.checkAuthenticated, (req, res) => {
+    listingsInDoubleArray = []
+        var connection = new Connection(dbConfig);  
+        connection.on('connect', function(err) {  
+            // If no error, then good to proceed.
+            queryFullOuterJoinListingsAndUsers()
+        }); 
+        connection.connect();
+        
+    
+        function queryFullOuterJoinListingsAndUsers(){
+            let request = new Request(`SELECT L.listingTitle, L.listingDescription, L.price, L.productCondition, L.city, L.listingPictureURL
+                FROM [dbo].[Listings] AS L
+                JOIN [dbo].[Listings_followers] AS LF
+                    ON L.listingID = LF.listingID
+                WHERE LF.userID = ${req.user.id}
+                FOR JSON PATH`, function(err) {
+                if (err){
+                    console.log(err);
+             }
+            });
+    
+            var result = "";  
+            request.on('row', function(columns) {  
+                columns.forEach(function(column) {  
+                if (column.value === null) {  
+                    console.log('NULL');  
+                    } else {  
+                        result+= column.value + " ";  
+                    }  
+                }); 
+            resultParsed = JSON.parse(result)
+            listingsInDoubleArray.push(resultParsed)
+            result ="";  
+            });
+        
+            request.on('done', function(rowCount, more) {  
+            console.log(rowCount + ' rows returned');  
+            }); 
+    
+            request.on("requestCompleted", function (rowCount, more) {
+                connection.close();
+                let listingsInSingleArray = listingsInDoubleArray.shift()
+                res.render('./myProfile/listingsIFollow.ejs', { listingsData: listingsInSingleArray, userSignedIn: req.user.id })
+            });
+    
+            connection.execSql(request);  
+        }
+})
 module.exports = router

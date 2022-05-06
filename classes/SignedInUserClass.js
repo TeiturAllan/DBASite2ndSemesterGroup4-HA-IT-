@@ -30,7 +30,8 @@ class SignedInUser{
 
         function deleteUserQueryDefintion(userBeingDeleted){
             
-            let request = new Request(`DELETE FROM dbo.Users WHERE id = '${userBeingDeleted.id}' AND username ='${userBeingDeleted.username}' AND password = '${userBeingDeleted.password}'`, function(err) {
+            let request = new Request(`DELETE FROM dbo.Listings WHERE listingOwnerUserID = ${userBeingDeleted.id};
+            DELETE FROM dbo.Users WHERE id = '${userBeingDeleted.id}' AND username ='${userBeingDeleted.username}' AND password = '${userBeingDeleted.password}';`, function(err) {
                 if (err){
                     console.log(err);
                 }
@@ -166,6 +167,49 @@ class SignedInUser{
 
             connection.execSql(request);  
         } 
+    }
+    
+    static followAListing(userId, listingID){
+        var connection = new Connection(dbConfig);  
+        connection.on('connect', function(err) {  
+            // If no error, then good to proceed.
+            console.log("Connected");   
+            executeFollowAListing(userId, listingID)
+        }); 
+        connection.connect();
+        
+        
+        function executeFollowAListing(userId, listingID){
+            let request = new Request(`INSERT INTO dbo.Listings_followers(userID, listingID)
+            VALUES( ${userId}, ${listingID})`, function(err) {
+                if (err){
+                    console.log(err);
+                }
+            });
+        
+            var result = "";  
+            request.on('row', function(columns) {  
+                columns.forEach(function(column) {  
+                if (column.value === null) {  
+                    console.log('NULL');  
+                } else {  
+                    result+= column.value + " ";  
+                }  
+            });  
+  
+            result ="";  
+            });
+            
+            request.on('done', function(rowCount, more) {  
+            console.log(rowCount + ' rows returned');  
+            }); 
+        
+            request.on("requestCompleted", function (rowCount, more) {
+                connection.close();
+            });
+        
+            connection.execSql(request);  
+        }
     }
 }
 

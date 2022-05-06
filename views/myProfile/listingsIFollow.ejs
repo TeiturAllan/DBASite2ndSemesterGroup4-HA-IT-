@@ -1,8 +1,6 @@
-<h1>Listings with category: <%= listingCategoryDisplay %></h1>
+<h1>Listings I follow</h1>
 
-<a href="/listings">Listings</a>
-<br>
-
+<a href="/myProfile">My Profile</a>
 <% listingsData.forEach(singleListing => { %>
     <div style="background:brown">
         <p><%= singleListing.listingTitle %> </p>
@@ -15,14 +13,10 @@
         <p><%= singleListing.email %> </p>
         <p><%= singleListing.listingPosted %> </p>
         <img src="<%= singleListing.listingPictureURL %>" alt="something went wrong when loading the image" width="500" height="500">
-        <br>
-        <form action="/listings/viewListings/<%= singleListing.listingID %>" method="POST">
-            <button type="submit">Follow this listing</button>
-        </form>    
+        <br>    
     </div>
     <br>
     <br>
     <br>
     
 <% }) %>
-
