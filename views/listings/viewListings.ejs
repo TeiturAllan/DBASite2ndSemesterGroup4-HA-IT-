@@ -3,8 +3,42 @@
 <a href="/listings">Listings</a>
 <br>
 
+<h5>Filter Listings</h5>
+<form action="/listings/viewListings/<%=categoryID%>/filtered" method="post">    
+    <label>location:</label>
+        <select name="location" id="location">
+            <option value="">No option chosen</option>
+            <option value="AND [dbo].[Listings].city = 'København/Hovedstaden' ">København/Hovedstaden</option>
+            <option value="AND [dbo].[Listings].city = 'Fyn' ">Fyn</option>
+            <option value="AND [dbo].[Listings].city = 'Sydjylland' ">Sydjylland</option>
+            <option value="AND [dbo].[Listings].city = 'Midtjylland' ">Midtjylland</option>
+            <option value="AND [dbo].[Listings].city = 'Nordjylland' ">Nordjylland</option>
+        </select>
+
+    <label for="productConditionRankID">listing item condition</label>
+        <select name="productConditionRankID" id="productConditionRankID">
+            <option value="">No option chosen</option>
+            <option value=" AND [dbo].[Listings].productCondition = 'Brand new' ">Brand new</option>
+            <option value="AND [dbo].[Listings].productCondition = 'Slightly Used' ">Slightly Used</option>
+            <option value="AND [dbo].[Listings].productCondition ='Moderately Used' ">Moderately Used</option>
+            <option value="AND [dbo].[Listings].productCondition ='Heavily Used' ">Heavily Used</option>
+            <option value="AND [dbo].[Listings].productCondition = 'Broken' ">Broken</option>
+        </select>
+
+    <label for="sortBy">Sort by</label>
+        <select name="sortBy" id="sortBy">
+            <option value="ORDER BY [dbo].[Users].goldmemberRankID DESC">No option chosen</option>
+            <option value="ORDER BY [dbo].[Listings].price ASC">Price: Lowest to highest</option>
+            <option value="ORDER BY [dbo].[Listings].price DESC">Price: Highest to lowest</option>
+            <option value="ORDER BY [dbo].[Listings].listingPosted ASC">Listing age: Oldest to newest</option>
+            <option value="ORDER BY [dbo].[Listings].listingPosted DESC">Listing age: Newest to oldest</option>
+        </select>
+
+    <button type="submit">Filter listings</button>
+
+</form>
 <% listingsData.forEach(singleListing => { %>
-    <div style="background:brown">
+    <div style="background:lightgray">
         <p><%= singleListing.listingTitle %> </p>
         <p><%= singleListing.listingDescription %> </p>
         <p><%= singleListing.price %>DDK </p>

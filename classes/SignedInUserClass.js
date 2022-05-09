@@ -94,14 +94,14 @@ class SignedInUser{
 
 
         function insertCreatedListingIntoDatabase(createdListing){
-            let request = new Request(`INSERT into dbo.Listings (listingTitle, listingDescription, listingOwnerUserID, categoryID, price, listingPictureURL, productCondition, city, listingsOwnerGoldmemberRank)
-                VALUES ('${createdListing.listingTitle}', '${createdListing.listingDescription}', ${createdListing.listingOwnerUserID}, '${createdListing.categoryID}', '${createdListing.price}', '${createdListing.listingPictureURL}', '${createdListing.productConditionRankID}', '${createdListing.city}', ${createdListing.listingsOwnerGoldmemberRank});`, function(err) {//defines the query using the Request Class imported from Tedious.js
+            let request = new Request(`INSERT into dbo.Listings (listingTitle, listingDescription, listingOwnerUserID, categoryID, price, listingPictureURL, productCondition, city, listingPosted, listingsOwnerGoldmemberRank)
+                VALUES ('${createdListing.listingTitle}', '${createdListing.listingDescription}', ${createdListing.listingOwnerUserID}, '${createdListing.categoryID}', '${createdListing.price}', '${createdListing.listingPictureURL}', '${createdListing.productConditionRankID}', '${createdListing.city}', '${createdListing.listingPosted}', ${createdListing.listingsOwnerGoldmemberRank});`, function(err) {//defines the query using the Request Class imported from Tedious.js
                 if(err){
                     console.log(err);
                 }
             })
             connection.execSql(request);
-            
+            console.log(request)
             request.on("requestCompleted", function (rowCount, more) {//defines what happens when the database tells the server that the request (query) is complete
                 connection.close();//closes the connection to the database
             });
