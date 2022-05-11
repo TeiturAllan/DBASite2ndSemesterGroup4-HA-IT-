@@ -4,22 +4,27 @@
 
 <br>
 
-<% listings.forEach(singleListing => { %>
-    <div style="background:lightgray">
-        <td><a href="/myProfile/myListings/<%=singleListing.listingID%>">update this listing</a></td>
-        <p><%= singleListing.listingTitle %> </p>
-        <p><%= singleListing.listingDescription %> </p>
-        <p><%= singleListing.price %>DDK </p>
-        <p><%= singleListing.productCondition %> </p>
-        <p><%= singleListing.city %> </p>
-        <p>Seller: <%= singleListing.username %> </p>
-        <p><%= singleListing.telephoneNumber %> </p>
-        <p><%= singleListing.email %> </p>
-        <p><%= singleListing.listingPosted %> </p>
-        <img src="<%= singleListing.listingPictureURL %>" alt="something went wrong when loading the image">
-    </div>
-    <br>
-    <br>
-    <br>
-    
-<% }) %>
+<table>
+    <tr>  
+        <td> listingTitle </td>
+        <td> listingDescription  </td>
+        <td> price  </td>
+        <td> productCondition  </td>
+        <td> city  </td>
+        <td> listingPosted  </td>
+    </tr>
+    <% listings.forEach(row => {  %>  
+     <tr>  
+        <td> <%= row.listingTitle %> </td>
+        <td> <%= row.listingDescription %> </td>
+        <td> <%= row.price %> </td>
+        <td> <%= row.productCondition %> </td>
+        <td> <%= row.city %> </td>
+        <td> <%= row.listingPosted %> </td>
+
+        <td><a href="/myProfile/myListings/<%=row.listingID%>">update this listing</a></td>
+    </tr> %>
+    <% }) %>
+</table>
+
+

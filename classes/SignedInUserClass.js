@@ -20,6 +20,10 @@ class SignedInUser{
         this.telephoneNumber = telephoneNumber
     }
     //start of deleteUserFromDatabase method
+    /* deleteUserFromDatabase function takes a variable from the '/myProfile/deleteUser' DELETE Request.
+    this variable is the information of the user that is currently signed in. this information is then used
+    as inputs in the query that is sent to the database*/
+
     static deleteUserFromDatabase(userBeingDeleted){
         var connection = new Connection(dbConfig);  
         connection.on('connect', function(err) {  
@@ -51,6 +55,13 @@ class SignedInUser{
     } //end of deleteUserFromDatabase method
 
 
+    //start of updateUserInDatabase function definition
+
+    /*updateUserInDatabase takes two inputs from the '/myProfile/updateUser' PUT request.
+    these inputs are the id of the user going to be updated and an object which contains the data that the user has inserted in the browser.
+    the data from the user is what the user wants the new user information to be in the database
+
+    these two inputs (userBeingUpdated and infoToBeUpdated) are then inserted into the query that starts on line 76*/
 
     static UpdateUserInDatabase(userBeingUpdated, infoToBeUpdated){
         var connection = new Connection(dbConfig);  
@@ -82,12 +93,18 @@ class SignedInUser{
         }    
 
     }
+    //end of updateUserInDatabase function definition
     
+
+    //start of createListing function definition
+    /* the createListing function takes an object as a paramater. this object is defined in the '/listings/createNewListing' POST Request.
+    this object is created with data insert by the user in the browser.
+    the object elements are then inserted into the query that is sent to the database. This query's defintion starts on line 113.
+    */
     static createListing(createdListing){
         var connection = new Connection(dbConfig);  
         connection.on('connect', function(err) {  
-            // If no error, then good to proceed.
-            console.log("Connected");   
+            // If no error, then good to proceed.  
             insertCreatedListingIntoDatabase(createdListing)
         }); 
         connection.connect();
@@ -101,7 +118,6 @@ class SignedInUser{
                 }
             })
             connection.execSql(request);
-            console.log(request)
             request.on("requestCompleted", function (rowCount, more) {//defines what happens when the database tells the server that the request (query) is complete
                 connection.close();//closes the connection to the database
             });
@@ -109,7 +125,15 @@ class SignedInUser{
         }
             
     }
-
+    //end of createListing function definition
+    
+    
+    //start of UpdateListingInDatabase function definition
+    /*the UpdateListingInDatabase function takes two paramaters. 
+    the first paramater is the id of the listing that is being updated which is accessed using req.params.listingID in the '/myProfile/myListings/:listingID' PUT request
+    the second paramater is an object that is created during the same PUT request. the information comes from the user inputs in the browser
+    these two paramaters are then inserted into query that is sent to the database
+    */
     static UpdateListingInDatabase(listingBeingUpdated, infoToBeUpdated){
         var connection = new Connection(dbConfig);  
         connection.on('connect', function(err) {  
@@ -140,7 +164,12 @@ class SignedInUser{
         }    
 
     }
-
+    //end of UpdateListingInDatabase function definition
+    
+    
+    //start of deleteListing function definition
+    /* deleteListing function uses one parameter. This paramater is defined as req.params.listingsID in the '/myProfile/myListings/:listingID/deleteListing' DELETE Request
+    the paramater is then inserted into the query that is sent to the database*/
     static deleteListing(listingID){
         var connection = new Connection(dbConfig);  
         connection.on('connect', function(err) {  
@@ -168,12 +197,19 @@ class SignedInUser{
             connection.execSql(request);  
         } 
     }
+    //end of deleteListing function definition
     
+
+    //start of followAListing function definition
+    /*followAListing uses two parameters. 
+    the userId paramater is the id of the user that is currently signed in
+    the listingsID parameter is the id of the listing that is being followed. this id defined using req.params.listingID in the '/listings/viewListings/:listingID' POST request
+    these two paramaters are then inserted into the query that is then sent to the database
+    */
     static followAListing(userId, listingID){
         var connection = new Connection(dbConfig);  
         connection.on('connect', function(err) {  
-            // If no error, then good to proceed.
-            console.log("Connected");   
+            // If no error, then good to proceed. 
             executeFollowAListing(userId, listingID)
         }); 
         connection.connect();
@@ -211,6 +247,7 @@ class SignedInUser{
             connection.execSql(request);  
         }
     }
+    //end of followAListing function definition
 }
 
 module.exports = SignedInUser

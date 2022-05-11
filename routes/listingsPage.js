@@ -4,7 +4,7 @@ router.use(express.static(__dirname + 'public'));
 
 
 const permissionHandler = require('../permissionHandlers/permissionHandlers')
-const decideFilteredListingsRequest = require('../database/decideFilteredListingsRequest')
+
 
 const Listing = require('../classes/ListingClass');
 const SignedInUser = require('../classes/SignedInUserClass')
@@ -27,19 +27,22 @@ const multerConfig = require('../multerConfig')
 
 
 
-
+//is used to access the page where a user can choose which listings he want to access (grouped by category)
 router.get('/', permissionHandler.checkAuthenticated, (req, res) => {
     res.render('./listings/listings.ejs', { usernameDisplay: req.user.username })
 })
 
 
-
+//used to access the createNewListingsPage
 router.get('/createNewListing', permissionHandler.checkAuthenticated, (req, res) => {
     res.render('./listings/createNewListing.ejs', { usernameDisplay: req.user.username })
 })
 
 
-
+//used to create a new listing
+//the first 7 lines are used to create a string, showing what time the listing was created, in a format that is usable i SQL
+//the listing is created using user input from the browser. 
+//after the listing has been created it is send to the database via the SignedInUser.createListings function
 router.post('/createNewListing', permissionHandler.checkAuthenticated, multerConfig.upload.single('image'), (req, res) => {
     let time = new Date()
     let YEARForSQL = time.getFullYear()
@@ -50,11 +53,12 @@ router.post('/createNewListing', permissionHandler.checkAuthenticated, multerCon
     let dateForSQL = `${YEARForSQL}-${MONTHForSQL}-${DAYForSQL} ${HourForSQL}:${MinutesForSQL}`
 
     let newListing = new Listing('id is created in database', req.body.listingTitle, req.body.listingDescription, req.user.id, req.user.goldmemberRankID, req.body.listingCategory, req.body.price, `../../public/${req.file.originalname}` , req.body.productConditionRankID, req.body.city, dateForSQL)
-    console.log(newListing)
     SignedInUser.createListing(newListing)
     res.redirect('/listings')
 })
 
+
+//is used to view listings by each category. the categoryID is defined by which link the user clicks on in the '/listings' page
 router.get('/viewListings/:categoryID', permissionHandler.checkAuthenticated, (req, res) => {
         listingsInDoubleArray = []
         categoryID = req.params.categoryID
@@ -127,7 +131,7 @@ router.get('/viewListings/:categoryID', permissionHandler.checkAuthenticated, (r
 })
 
 
-
+//is used when a button on each listing is clicked, to create a row in the listings_followers table in the database
 router.post('/viewListings/:listingID', permissionHandler.checkAuthenticated, (req, res) =>{
     SignedInUser.followAListing(req.user.id, req.params.listingID)
     res.send('success').status(200)
@@ -180,7 +184,6 @@ router.post('/viewListings/:categoryID/filtered', permissionHandler.checkAuthent
              }
             });
 
-        console.log(request)
 
         var result = "";  
         request.on('row', function(columns) {  
@@ -192,7 +195,7 @@ router.post('/viewListings/:categoryID/filtered', permissionHandler.checkAuthent
                 }  
             }); 
         resultParsed = JSON.parse(result)
-        console.log(result)
+
         listingsInDoubleArray.push(resultParsed)
         result ="";  
         });

@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
     
         cb(null, file.originalname)
     }
-})
+})//this defines where the image will be stored
 
 const imageFilter = (req, file, cb) => {
     if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
@@ -25,6 +25,7 @@ const imageFilter = (req, file, cb) => {
     cb(null, false);
     }
 };//this code means that uploading will only work if the image is a the file type JPEG or PNG
+
 
 const upload = multer({
     storage: storage, 

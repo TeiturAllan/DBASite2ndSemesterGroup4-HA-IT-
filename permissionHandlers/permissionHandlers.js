@@ -1,5 +1,6 @@
 const SignedInAdmin = require("../classes/SignedInAdminClass")
 
+//these functions are used to deny access to users that are not allowed access certain pages/methods
 
 
 function checkAuthenticated(req, res, next) {//function the checks if a user is signed in on the browser, and defines what happens if a user is authenticated/signed in
@@ -19,7 +20,7 @@ function checkNotAuthenticated(req, res, next) {//defines what happens when a us
 }
 
 
-
+//this function is used to ensure that only admins can access certain pages/methods
 function checkIfAdmin(req, res, next){
     if (req.user instanceof SignedInAdmin){
         return next()

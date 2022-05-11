@@ -4,7 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 //start of dependancies 
 const express = require('express')
-const app = express()
+const app = express();
 const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
@@ -75,17 +75,17 @@ app.get('/', permissionHandler.checkAuthenticated, (req, res) => {
 
 
 
-app.get('/login', permissionHandler.checkNotAuthenticated, (req, res) => {//checkNotAuthenticated is function that is defined on line 122. passport.authenticate is middleware function from passport.js, and is used to authenticate a user '/login' which is the login.ejs file (website login page)
+app.get('/login', permissionHandler.checkNotAuthenticated, (req, res) => {
 res.render('login.ejs')
 })
 
 
 
-app.post('/login', permissionHandler.checkNotAuthenticated, passport.authenticate('local', {//checkNotAuthenticated is function that is defined on line 122. passport.authenticate is middleware function from passport.js, and is used to authenticate a user
-    successRedirect: '/',//if user is successfully authenticated, then client is sends the '/' GET request, which loads the index.js file (website homepage)
-    failureRedirect: '/login',//if user authentication fails, then user is directed back the login page
-    failureFlash: true//this allows the message 'Email or password incorrect' to appear if user authentication (login) fails. message is defined on line 57 in the 'passportConfig.js' file
-}))//HTTP POST request used for login. 
+app.post('/login', permissionHandler.checkNotAuthenticated, passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/login',
+    failureFlash: true
+})) 
 
 
 
@@ -109,6 +109,6 @@ PORT = 3000
 app.listen(PORT)
 console.log(`Server is listening on port ${PORT}`)
 
-
+module.exports = app;
 
 
